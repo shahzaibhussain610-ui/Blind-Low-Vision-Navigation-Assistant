@@ -315,6 +315,12 @@ Requires **Python 3.10+**.
 
    The app opens in your browser (default `http://localhost:8501`).
 
+### Streamlit Cloud deployment
+
+The project uses `opencv-python-headless` because Streamlit Cloud does not
+provide desktop OpenGL libraries such as `libGL.so.1`. Streamlit's file watcher
+is also disabled in `.streamlit/config.toml` to avoid Linux inotify limit errors.
+
 ---
 
 ## Usage — running the dashboard
