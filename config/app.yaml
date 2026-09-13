@@ -1,0 +1,90 @@
+application:
+  name: "Blind/Low-Vision Navigation Assistant"
+  version: "0.1.0"
+  environment: "development"
+
+system:
+  cpu_mode: true
+  enable_gpu_if_available: true
+
+performance:
+  target_fps: 15
+  max_processing_width: 640
+
+logging:
+  level: "INFO"
+
+paths:
+  data_dir: "data"
+  models_dir: "models"
+  results_dir: "results"
+  logs_dir: "logs"
+
+# Part 2 — Webcam & Video Input
+input:
+  webcam:
+    default_index: 0
+    width: 640
+    height: 480
+    target_fps: 15
+    backend: "auto"          # auto | dshow | msmf | any
+  video:
+    supported_extensions: [".mp4", ".avi", ".mov", ".mkv"]
+    max_upload_mb: 500
+  processing:
+    frame_skip: 0            # 0=every frame, 1=every 2nd, 2=every 3rd
+    max_width: 640
+    preserve_aspect_ratio: true
+
+# Part 3 — YOLO11 Object Detection
+detection:
+  model: "yolo11n.pt"        # lightweight variant, suitable for CPU laptops
+  confidence_threshold: 0.40
+  iou_threshold: 0.45
+  image_size: 640
+  max_detections: 100
+  device: "auto"             # auto | cpu | cuda
+  warmup: true               # one warmup inference after loading
+  class_filter:
+    mode: "all"               # all | navigation | custom
+    custom_classes: []       # used only when mode == custom
+
+# Part 4 — Relative Depth Estimation
+depth:
+  mode: "heuristic"          # heuristic (fast bbox proxy) | midas (monocular model)
+  near_threshold: 0.62       # relative depth >= this is considered NEAR
+  far_threshold: 0.35        # relative depth <= this is considered FAR
+
+# Part 5 — Object Tracking & Movement
+tracking:
+  tracker: "bytetrack.yaml"  # ultralytics tracker config
+  history_length: 12         # frames of history per track
+  static_threshold_px: 6.0   # center displacement below this = STATIC
+  approaching_depth_delta: 0.03  # depth increase per frame = APPROACHING
+  min_history: 3             # frames needed before movement is certain
+
+# Part 6 — Spatial & Walkable-Area Analysis
+spatial:
+  path_width_ratio: 0.40     # walking-path corridor width (fraction of frame)
+  path_min_depth: 0.30       # objects closer than this can block the path
+
+# Part 7 — Risk Assessment
+risk:
+  critical_depth: 0.45       # relative depth thresholds (higher = nearer)
+  high_depth: 0.35
+  medium_depth: 0.22
+  approaching_boost: 1       # level bump for approaching objects
+  low_confidence: 0.55       # below this, risk is raised one level (conservative)
+  hazard_classes: ["person", "car", "truck", "bus", "motorcycle", "bicycle", "dog"]
+
+# Part 8 — Navigation Decisions
+navigation:
+  min_command_interval: 8    # frames between non-critical command changes
+  hysteresis_frames: 3       # new command must persist this long to switch
+  uncertainty_stop: true     # STOP when tracking state is UNCERTAIN in path
+
+# Part 9 — Virtual Haptic Feedback
+haptic:
+  enabled: true
+  pulse_interval_s: 0.4      # pulse repetition for repeated patterns
+

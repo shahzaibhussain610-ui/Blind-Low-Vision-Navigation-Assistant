@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+
+# Environment
+.env
+
+# Logs
+logs/*.log
+
+# Model weights
+models/*.pt
+models/*.onnx
+models/*.engine
+*.pt
+
+# Data (keep structure via .gitkeep)
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+
+# Results
+results/*
+!results/**/
+
+# IDE / OS
+.ipynb_checkpoints/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
