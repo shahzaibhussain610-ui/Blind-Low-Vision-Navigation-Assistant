@@ -11,6 +11,7 @@ Complete pipeline:
 from __future__ import annotations
 
 import sys
+import time
 import traceback
 from pathlib import Path
 
@@ -528,6 +529,11 @@ def render_webcam_ui(config: ConfigManager) -> None:
             run_detection_on_packet(packet, frame_ph)
         else:
             frame_ph.image(packet.to_rgb(), width="stretch")
+        # Streamlit executes the script top-to-bottom once per run. Keep the
+        # local OpenCV camera alive by scheduling the next frame refresh.
+        target_fps = float(config.get("input.webcam.target_fps", 15))
+        time.sleep(1.0 / max(target_fps, 1.0))
+        st.rerun()
     elif manager.state is InputState.ERROR:
         st.error(f"Input error: {manager.error_message}")
         manager.stop()
@@ -535,6 +541,8 @@ def render_webcam_ui(config: ConfigManager) -> None:
         session.webcam_running = False
     else:
         st.warning("Waiting for frames from the webcam…")
+        time.sleep(0.1)
+        st.rerun()
 
 
 def render_video_ui(config: ConfigManager) -> None:
